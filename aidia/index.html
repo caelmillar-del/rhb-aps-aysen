@@ -97,19 +97,19 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <div class="col izq">
       <div class="card">
         <h2>Cumplimiento por dispositivo</h2>
-        <p class="q">Cumplimiento ponderado y tramo de descuento. <span id="q-tramos"></span></p>
+        <p class="q" id="q-tramos"></p>
         <div class="chart" id="semaforo" style="min-height:6.5rem"></div>
       </div>
       <div class="card">
         <h2>Indicadores de la red AIDIA</h2>
-        <p class="q">Ambos dispositivos sumados frente a la meta (línea vertical).</p>
+        <p class="q">Red completa frente a la meta (línea).</p>
         <div class="chart" id="bullets"></div>
       </div>
     </div>
 
     <div class="card centro">
       <h2>¿Dónde están las brechas?</h2>
-      <p class="q">Resultado de cada indicador por dispositivo frente a su meta.</p>
+      <p class="q">Resultado de cada indicador frente a su meta, por dispositivo.</p>
       <div class="legend" id="leg-matriz"></div>
       <div class="chart" id="matriz"></div>
       <p class="insight" id="mensaje" aria-live="polite"></p>
@@ -117,7 +117,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     <div class="card">
       <h2>Evolución mes a mes</h2>
-      <p class="q">Registros del mes por dispositivo. AIDIA Aysén funciona desde mediados de 2026.</p>
+      <p class="q">Registros del mes. AIDIA Aysén funciona desde agosto de 2026.</p>
       <div class="legend" id="leg-tend"></div>
       <div class="chart" id="tendencia"></div>
     </div>
@@ -253,7 +253,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     status($('k3s'), 'info', ing && ing.pct !== null ? p0(ing.pct) + ' con PTI' : 'sin ingresos');
     $('k4v').textContent = tea ? pctTxt(tea) : '—';
     status($('k4s'), tea && tea.pct !== null ? 'info' : 'sec', tea && tea.pct !== null ? int(tea.num) + ' de ' + int(tea.den) + ' evaluados' : 'sin dato a este corte');
-    $('q-tramos').textContent = C.T.map((t, i) => (i === 0 ? t.desde + '% o más' : t.desde > 0 ? t.desde + '–' + String(C.T[i - 1].desde - 0.1).replace('.', ',') + '%' : '<' + C.T[i - 1].desde + '%') + ': ' + t.tramo.toLowerCase().replace('descuento ', 'desc. ')).join(' · ') + '.';
+    $('q-tramos').textContent = 'Verde ≥' + C.T[0].desde + '% sin desc. · Ámbar ' + C.T[1].desde + '–' + String(C.T[0].desde - 0.1).replace('.', ',') + '% desc. 50% · Rojo <' + C.T[1].desde + '%';
 
     const m = $('mensaje'); m.textContent = '';
     if (peor) m.append('A ', B(mesLargo(corte)), ', el indicador más rezagado de la red es ', B(peor.indicador), ' (', B(p1(peor.pct)), ' frente a ', B(peor.meta + '%'), ').');
@@ -324,7 +324,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       const parts = n.split(' · '), t = svg.append('text').attr('text-anchor', 'end').attr('font-size', 13).attr('fill', 'var(--fg)');
       parts.forEach((p, i) => t.append('tspan').attr('x', ml - 10).attr('y', y(e) + y.bandwidth() / 2 + (i - (parts.length - 1) / 2) * 17).attr('dy', '0.35em').attr('font-weight', i === 0 ? 600 : 400).text(p));
     });
-    const tip = tipOf(box), big = Math.min(36, Math.max(16, y.bandwidth() / 3.8));
+    const tip = tipOf(box), big = Math.min(36, x.bandwidth() / 3.3, Math.max(16, y.bandwidth() / 3.8));
     rows.forEach((r) => {
       const kind = estadoColor(r.estado), cx = x(r.ind), cy = y(r.establecimiento), cw = x.bandwidth(), ch = y.bandwidth(), g = svg.append('g');
       g.append('rect').attr('x', cx).attr('y', cy).attr('width', cw).attr('height', ch).attr('rx', 6).attr('fill', COL[kind]).attr('fill-opacity', 0.18).attr('stroke', COL[kind]).attr('stroke-width', 1.5);
