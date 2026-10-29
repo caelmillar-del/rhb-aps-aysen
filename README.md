@@ -6,3 +6,12 @@ Vista web del dashboard de monitoreo del Programa de Rehabilitación Integral (c
 - **Contenido:** datos agregados por establecimiento y mes (ingresos, ingresos con PTI, altas, intervención grupal, participación en comunidad). No contiene datos de personas.
 - **Actualización:** mensual, con cada nueva carga de la planilla de monitoreo. El enlace se mantiene.
 - **Archivo:** `index.html` es autónomo (incluye datos, estilos y la librería d3 v7.9.0); funciona sin conexión.
+
+## Monitoreo AIDIA · Apoyos y Rehabilitación para NNA
+
+Tablero del programa AIDIA (Res. Exenta N° 959/2025, MINSAL) en AIDIA Coyhaique (CAG) y AIDIA Aysén (CPA).
+
+- **Ver el tablero:** https://caelmillar-del.github.io/rhb-aps-aysen/aidia/
+- **Contenido:** datos agregados por dispositivo y mes (ingresos, ingresos con PTI, altas, actividad grupal, participación en comunidad) y acumulados de TEA y capacitación. No contiene datos de personas.
+- **Actualización:** mensual. La pestaña "Actualizar datos" lee la planilla del mes en el navegador; los datos publicados están en el bloque `id="datos"` de `aidia/index.html`. El enlace se mantiene.
+- **Archivo:** `aidia/index.html` carga d3 y SheetJS desde cdnjs, por lo que necesita conexión a internet.

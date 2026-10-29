@@ -1,0 +1,538 @@
+<title>Monitoreo AIDIA Aysén 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+/* Layout: tablero de gestión de una columna ancha; encabezado con banda de color del programa, filtros, pestañas, tarjetas por pregunta. */
+:root {
+  --bg: #F6F8F8; --panel: #FFFFFF; --fg: #14211F; --muted: #5A6B68; --line: #D9E2E0;
+  --accent: #0F766E; --accent-soft: #E0F0EE; --s2: #4F5BD5;
+  --ok: #16A34A; --warn: #D97706; --bad: #DC2626; --info: #0F766E; --sec: #8A9896;
+  --tip: #FFFFFF; --shadow: 0 6px 20px rgba(20,33,31,.12);
+  --f-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1514; --panel: #162120; --fg: #E5EEEC; --muted: #9AABA8; --line: #2A3836;
+  --accent: #2DBFAF; --accent-soft: #143331; --s2: #8C95F0; --ok: #22C55E; --warn: #F59E0B; --bad: #F05252; --info: #2DBFAF; --sec: #6F7E7C;
+  --tip: #1E2B29; --shadow: 0 6px 20px rgba(0,0,0,.45); color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0E1514; --panel: #162120; --fg: #E5EEEC; --muted: #9AABA8; --line: #2A3836;
+  --accent: #2DBFAF; --accent-soft: #143331; --s2: #8C95F0; --ok: #22C55E; --warn: #F59E0B; --bad: #F05252; --info: #2DBFAF; --sec: #6F7E7C;
+  --tip: #1E2B29; --shadow: 0 6px 20px rgba(0,0,0,.45); color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 76rem; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+header.top { border-top: 5px solid var(--accent); padding-top: 14px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 0; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(1.6rem, 3.2vw, 2.25rem); line-height: 1.15; margin: 4px 0 6px; text-wrap: balance; }
+.purpose { color: var(--muted); margin: 0; max-width: 62ch; }
+.meta-line { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+.meta-line b, .badge b { color: var(--fg); font-weight: 600; }
+.filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 20px; margin: 20px 0 14px; }
+.fgroup { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fgroup > span { font-size: 12px; color: var(--muted); }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+button { font: inherit; }
+.seg button, .btn { font-size: 13px; min-height: 40px; min-width: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); color: var(--fg); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.badge { font-size: 13px; color: var(--muted); align-self: center; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin-bottom: 20px; overflow-x: auto; }
+.tabs button { border: none; border-bottom: 3px solid transparent; background: transparent; color: var(--muted); padding: 0 14px; min-height: 44px; white-space: nowrap; cursor: pointer; font-size: 15px; }
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.insight { font-size: 1.15rem; line-height: 1.5; margin: 0 0 20px; max-width: 64ch; }
+.insight b { font-weight: 600; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 14px; margin-bottom: 24px; }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-left: 6px solid var(--sec); border-radius: var(--r); padding: 14px 16px; min-width: 0; }
+.kpi .lab { font-size: 13px; color: var(--muted); }
+.kpi .val { font-family: var(--f-display); font-size: 2.4rem; line-height: 1.1; margin: 4px 0; font-variant-numeric: tabular-nums; }
+.kpi .val small { font-family: var(--f-body); font-size: 15px; color: var(--muted); }
+.kpi .st { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; }
+.kpi .ctx { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: 14px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0; }
+.card + .card, .grid2 + .card, .card + .grid2 { margin-top: 14px; }
+.card h2 { font-size: 1.05rem; font-weight: 600; margin: 0 0 2px; text-wrap: balance; }
+.card .q { font-size: 13px; color: var(--muted); margin: 0 0 12px; line-height: 1.45; }
+.chart { position: relative; width: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.sw { display: inline-block; width: 11px; height: 11px; border-radius: 2px; }
+.tip { position: absolute; pointer-events: none; background: var(--tip); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); padding: 6px 10px; font-size: 12px; opacity: 0; white-space: nowrap; z-index: 5; }
+.tip .t { color: var(--muted); margin-bottom: 2px; }
+.tblwrap { max-height: 30rem; overflow: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+th { position: sticky; top: 0; background: var(--panel); text-align: left; font-weight: 600; color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--line); }
+td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.n, th.n { text-align: right; }
+td.wide { min-width: 15rem; line-height: 1.45; }
+tr.red td { font-weight: 600; }
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 7px; border-radius: 999px; border: 1px solid; white-space: nowrap; font-weight: 600; font-size: 12px; }
+.tag { display: inline-block; padding: 0 7px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; font-size: 12px; }
+ul.method { font-size: 13px; color: var(--muted); line-height: 1.55; padding-left: 1.2rem; margin: 0; }
+ul.method li { margin-bottom: 6px; }
+ul.method b { color: var(--fg); }
+.loader { display: grid; gap: 10px; }
+.loader input[type=file] { font: inherit; font-size: 13px; max-width: 100%; }
+.msg { font-size: 13px; padding: 8px 10px; border-radius: var(--r); background: var(--accent-soft); color: var(--fg); }
+.msg.err { background: color-mix(in srgb, var(--bad) 15%, transparent); }
+textarea { width: 100%; min-height: 7rem; font: 12px/1.4 ui-monospace, Menlo, Consolas, monospace; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 8px; box-sizing: border-box; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+@media (max-width: 640px) { .hide-narrow { display: none; } .kpi .val { font-size: 2rem; } }
+</style>
+
+<div class="wrap" id="top">
+  <header class="top">
+    <p class="eyebrow">Servicio de Salud Aysén · Rehabilitación · NNA</p>
+    <h1>Monitoreo AIDIA 2026</h1>
+    <p class="purpose">Apoyos y Rehabilitación para niños, niñas y adolescentes en AIDIA Coyhaique (CAG) y AIDIA Aysén (CPA): cumplimiento ponderado, tramo de descuento y brechas por indicador, según la Res. Exenta N° 959/2025 del MINSAL.</p>
+    <p class="meta-line">Datos de <b id="h-periodo">—</b> · cargados el <b id="h-fecha">—</b> desde <span id="h-archivo">—</span>. <span id="h-preview" hidden><b>Vista previa de una planilla cargada en este navegador, no publicada.</b></span></p>
+  </header>
+
+  <div class="filters" role="group" aria-label="Filtros">
+    <div class="fgroup"><span id="lbl-corte">Corte (acumulado desde enero hasta)</span><div class="seg" id="f-corte" role="group" aria-labelledby="lbl-corte"></div></div>
+    <div class="fgroup"><span id="lbl-metodo">Método de cumplimiento</span><div class="seg" id="f-metodo" role="group" aria-labelledby="lbl-metodo">
+      <button type="button" id="m-planilla" data-metodo="planilla" aria-pressed="true">Resultado × peso (planilla)</button>
+      <button type="button" id="m-meta" data-metodo="meta" aria-pressed="false">Logro vs meta</button>
+    </div></div>
+    <span class="badge" id="badge" aria-live="polite"></span>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Vistas">
+    <button type="button" role="tab" id="tab-situacion" aria-controls="situacion" aria-selected="true">Situación</button>
+    <button type="button" role="tab" id="tab-brechas" aria-controls="brechas" aria-selected="false">Brechas</button>
+    <button type="button" role="tab" id="tab-detalle" aria-controls="detalle" aria-selected="false">Detalle técnico</button>
+    <button type="button" role="tab" id="tab-actualizar" aria-controls="actualizar" aria-selected="false">Actualizar datos</button>
+  </nav>
+
+  <section id="situacion" role="tabpanel" aria-labelledby="tab-situacion">
+    <p class="insight" id="mensaje" aria-live="polite"></p>
+    <div class="kpis">
+      <div class="kpi" id="k1"><div class="lab">Dispositivos sin descuento</div><div class="val" id="k1v">—</div><div class="st" id="k1s"></div><div class="ctx" id="k1c"></div></div>
+      <div class="kpi" id="k2"><div class="lab">Indicador más rezagado de la red</div><div class="val" id="k2v">—</div><div class="st" id="k2s"></div><div class="ctx" id="k2c"></div></div>
+      <div class="kpi" id="k3" style="border-left-color: var(--accent)"><div class="lab">NNA ingresados en el período</div><div class="val" id="k3v">—</div><div class="st" id="k3s"></div><div class="ctx" id="k3c"></div></div>
+      <div class="kpi" id="k4" style="border-left-color: var(--accent)"><div class="lab">Diagnóstico TEA confirmado (línea base)</div><div class="val" id="k4v">—</div><div class="st" id="k4s"></div><div class="ctx" id="k4c"></div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>¿Qué dispositivo tiene descuento?</h2>
+        <p class="q">Cumplimiento ponderado y tramo de descuento de la Res. Ex. 959. Es referencial: la reliquidación oficial usa el corte al 31 de julio. Líneas punteadas: límites de tramo. <span id="q-tramos"></span></p>
+        <div class="chart" id="semaforo" style="min-height:9rem"></div>
+      </div>
+      <div class="card">
+        <h2>¿Qué indicadores cumple la red AIDIA?</h2>
+        <p class="q">Ambos dispositivos sumados frente a la meta (línea vertical). Verde: cumple. Ámbar: 80% de la meta o más. Rojo: menos del 80%. Verde azulado: línea base o actividad programada. Gris: sin dato al corte.</p>
+        <div class="chart" id="bullets" style="min-height:24rem"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="brechas" role="tabpanel" aria-labelledby="tab-brechas" hidden>
+    <div class="card">
+      <h2>¿Dónde están las brechas?</h2>
+      <p class="q">Resultado de cada indicador por dispositivo. Ícono y color dicen si cumple, está cerca o está bajo la meta.</p>
+      <div class="legend" id="leg-matriz"></div>
+      <div class="chart" id="matriz" style="min-height:8rem"></div>
+    </div>
+    <div class="grid2" style="margin-top:14px">
+      <div class="card">
+        <h2>¿Cuánto falta para cumplir?</h2>
+        <p class="q">NNA (o funcionarios, en capacitación) adicionales que se necesitan con el denominador actual para alcanzar cada meta.</p>
+        <div class="tblwrap"><table id="t-faltan"><thead><tr><th>Dispositivo</th><th>Indicador</th><th class="n">Resultado</th><th class="n">Meta</th><th class="n">Faltan</th><th>Estado</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="card">
+        <h2>¿Cómo evoluciona cada dispositivo mes a mes?</h2>
+        <p class="q">Registros del mes, no acumulados. AIDIA Aysén funciona desde mediados de 2026: sus meses en 0 antes de agosto son reales. Los meses posteriores al corte se atenúan.</p>
+        <div class="legend" id="leg-tend"></div>
+        <div class="chart" id="tendencia" style="min-height:18rem"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="detalle" role="tabpanel" aria-labelledby="tab-detalle" hidden>
+    <div class="card">
+      <h2>Cambio respecto del corte anterior</h2>
+      <p class="q">Cumplimiento con el método seleccionado. Antes de septiembre, TEA y capacitación no tienen dato y aportan 0, por lo que esos cortes no son comparables.</p>
+      <div class="tblwrap"><table id="t-cambio"><thead><tr><th>Dispositivo</th><th class="n">Corte anterior</th><th class="n">Corte actual</th><th>Tramo anterior</th><th>Tramo actual</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Indicadores con intervalo de confianza</h2>
+      <p class="q">Intervalo de Wilson al 95%. Con denominadores pequeños un solo caso mueve el resultado varios puntos: leer el intervalo antes de comparar dispositivos.</p>
+      <div class="tblwrap"><table id="t-detalle"><thead><tr><th>Dispositivo</th><th>Ind.</th><th class="n">Num.</th><th class="n">Den.</th><th class="n">%</th><th class="n hide-narrow">IC inf</th><th class="n hide-narrow">IC sup</th><th class="n">Meta</th><th class="n">Peso</th><th class="n">Logro</th><th class="n">Faltan</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Calidad de datos y método</h2>
+      <p class="q">Hallazgos de la revisión de la planilla. Los marcados en rojo pueden cambiar el tramo de descuento.</p>
+      <div class="tblwrap"><table id="t-calidad"><thead><tr><th class="n">#</th><th>Tipo</th><th>Hallazgo</th><th class="hide-narrow">Detalle</th><th>Acción sugerida</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Cómo se calcula</h2>
+      <ul class="method">
+        <li><b>Fórmulas, metas y pesos</b> de la Res. Exenta N° 959 (01-12-2025), que aprueba el Programa Atención Integral al Desarrollo Infantoadolescente: I1 TEA confirmados / evaluados (línea base); I2 participación en comunidad / ingresos; I3 ingresos con PTI / ingresos; I4 altas / ingresos con PTI; I5 funcionarios capacitados / definidos a capacitar. Pesos 10, 25, 30, 20 y 15%. </li>
+        <li><b>Resultado × peso:</b> suma de resultado % × peso / 100, el método de la hoja META. <b>Logro vs meta:</b> suma de mín(resultado / meta; 1) × peso; el I1, sin meta, se suma igual que en la planilla. La resolución no define el método: confirmar cuál aplica.</li>
+        <li><b>Cortes oficiales:</b> 30 de abril, 31 de julio (reliquidación de la 2ª cuota en octubre) y 31 de diciembre. Los demás cortes son de gestión.</li>
+        <li><b>I5 capacitación:</b> se marca “Programado” hasta diciembre, cuando el SSA ejecuta la licitación; mientras tanto aporta 0.</li>
+        <li><b>Corte:</b> I2 a I4 suman los meses desde enero hasta el elegido. I1 e I5 usan el último acumulado informado hasta ese corte; si no hay, se muestran “Sin dato” y aportan 0.</li>
+        <li><b>Semáforo de indicadores</b> (propuesta): cumple si alcanza la meta; cerca si llega al 80% de la meta.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="actualizar" role="tabpanel" aria-labelledby="tab-actualizar" hidden>
+    <div class="grid2">
+      <div class="card">
+        <h2>Cargar la planilla del mes</h2>
+        <p class="q">Elige la planilla de monitoreo AIDIA (.xlsx) con el nuevo mes completado. El tablero se recalcula en este navegador para revisarlo; no cambia lo que ven los demás.</p>
+        <div class="loader">
+          <input type="file" id="archivo" accept=".xlsx,.xls">
+          <div id="carga-msg" class="msg" hidden></div>
+          <div class="row"><button type="button" class="btn" id="volver">Volver a los datos publicados</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Publicar la actualización</h2>
+        <ul class="method">
+          <li><b>Opción simple:</b> adjunta la planilla a Claude y pide “actualiza el monitoreo AIDIA”. Se revisa la calidad y se publica en este mismo link.</li>
+          <li><b>Opción manual (GitHub Pages):</b> después de cargar la planilla aquí, copia los datos de abajo y reemplaza con ellos el bloque <b>id="datos"</b> del archivo HTML del repositorio.</li>
+        </ul>
+        <div class="row" style="margin:10px 0 6px"><button type="button" class="btn primary" id="copiar">Copiar datos</button><span id="copiar-msg" class="badge"></span></div>
+        <label for="json" class="badge">Datos que usa el tablero ahora</label>
+        <textarea id="json" readonly></textarea>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script type="application/json" id="datos">{"carga":{"fecha_carga":"29-10-2026","archivo":"MONITOREO AIDIA CORTE SEPTIEMBRE 2026.xlsx (versión ajustada, 29-10-2026)"},"establecimientos":[{"establecimiento":"CAG","nombre":"CAG · AIDIA Coyhaique"},{"establecimiento":"CPA","nombre":"CPA · AIDIA Aysén"}],"indicadores":[{"ind":"I1","indicador":"I1 Diagnóstico TEA confirmado","corto":"TEA","num":"tea_confirmados","den":"tea_evaluados","fuente":"anual","meta":null,"peso":10.0,"unidad":"NNA","medio":"Registro local"},{"ind":"I2","indicador":"I2 Participación en comunidad","corto":"Participación","num":"participacion","den":"ingresos","fuente":"mensual","meta":30.0,"peso":25.0,"unidad":"NNA","medio":"REM A28"},{"ind":"I3","indicador":"I3 Ingresos con PTI","corto":"Con PTI","num":"ingresos_pti","den":"ingresos","fuente":"mensual","meta":75.0,"peso":30.0,"unidad":"NNA","medio":"REM A28"},{"ind":"I4","indicador":"I4 Altas terapéuticas","corto":"Altas","num":"altas","den":"ingresos_pti","fuente":"mensual","meta":40.0,"peso":20.0,"unidad":"NNA","medio":"REM A28"},{"ind":"I5","indicador":"I5 Funcionarios capacitados","corto":"Capacitación","num":"cap_capacitados","den":"cap_definidos","fuente":"anual","meta":100.0,"peso":15.0,"unidad":"funcionarios","medio":"Informe del Servicio de Salud","programado":"2026-12"}],"tramos":[{"desde":50.0,"tramo":"Sin descuento"},{"desde":40.0,"tramo":"Descuento 50%"},{"desde":30.0,"tramo":"Descuento 75%"},{"desde":0.0,"tramo":"Descuento 100%"}],"mensual":[{"mes":"2026-01","establecimiento":"CAG","ingresos":5,"ingresos_pti":5,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-01","establecimiento":"CPA","ingresos":0,"ingresos_pti":0,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-02","establecimiento":"CAG","ingresos":2,"ingresos_pti":2,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-02","establecimiento":"CPA","ingresos":0,"ingresos_pti":0,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-03","establecimiento":"CAG","ingresos":0,"ingresos_pti":0,"altas":1,"grupal":0,"participacion":0},{"mes":"2026-03","establecimiento":"CPA","ingresos":0,"ingresos_pti":0,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-04","establecimiento":"CAG","ingresos":6,"ingresos_pti":6,"altas":1,"grupal":0,"participacion":0},{"mes":"2026-04","establecimiento":"CPA","ingresos":0,"ingresos_pti":0,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-05","establecimiento":"CAG","ingresos":15,"ingresos_pti":15,"altas":8,"grupal":0,"participacion":0},{"mes":"2026-05","establecimiento":"CPA","ingresos":0,"ingresos_pti":0,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-06","establecimiento":"CAG","ingresos":4,"ingresos_pti":4,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-06","establecimiento":"CPA","ingresos":0,"ingresos_pti":0,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-07","establecimiento":"CAG","ingresos":6,"ingresos_pti":6,"altas":1,"grupal":6,"participacion":0},{"mes":"2026-07","establecimiento":"CPA","ingresos":0,"ingresos_pti":0,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-08","establecimiento":"CAG","ingresos":1,"ingresos_pti":1,"altas":0,"grupal":4,"participacion":0},{"mes":"2026-08","establecimiento":"CPA","ingresos":24,"ingresos_pti":24,"altas":0,"grupal":0,"participacion":0},{"mes":"2026-09","establecimiento":"CAG","ingresos":4,"ingresos_pti":4,"altas":3,"grupal":2,"participacion":1},{"mes":"2026-09","establecimiento":"CPA","ingresos":11,"ingresos_pti":11,"altas":2,"grupal":2,"participacion":0}],"anual":[{"corte":"2026-09","establecimiento":"CAG","tea_confirmados":0,"tea_evaluados":14,"cap_capacitados":0,"cap_definidos":40},{"corte":"2026-09","establecimiento":"CPA","tea_confirmados":11,"tea_evaluados":12,"cap_capacitados":0,"cap_definidos":40}],"calidad":[{"n":1,"tipo":"Resuelto","hallazgo":"Peso del I3 (PTI) corregido a 30%","detalle":"La planilla ya usa los pesos de la Res. Ex. 959 (10, 25, 30, 20 y 15%; suma 100). Resultado: CAG 37,1% y CPA 40,3%, iguales en planilla y tablero.","accion":""},{"n":2,"tipo":"Método de cálculo","hallazgo":"La resolución no define cómo se pondera el cumplimiento","detalle":"La planilla suma resultado × peso sin usar la meta: un dispositivo que alcanza exactamente todas las metas obtiene solo 53% más el aporte del I1 (I2 7,5 + I3 22,5 + I4 8 + I5 15), y quedaría casi en el límite del descuento. Con mín(resultado/meta; 1) × peso, cumplir todas las metas da 100%. Hoy: CAG 37,1% vs 48,2%; CPA 40,3% vs 42,0%.","accion":"Consultar a la División de Atención Primaria (MINSAL) qué método se usa en la reliquidación. El selector de método muestra ambos."},{"n":3,"tipo":"Normativa","hallazgo":"El tramo de este corte es referencial","detalle":"Según la resolución, la reliquidación de la 2ª cuota (30%) se hace en octubre con el corte al 31 de julio. La tercera evaluación (31 de diciembre) puede incidir en la asignación del año siguiente. Septiembre no es un corte oficial.","accion":"Usar este tablero para gestión; informar con los cortes oficiales (30 abril, 31 julio, 31 diciembre)."},{"n":4,"tipo":"Programado","hallazgo":"I5 capacitación en 0: se ejecutará en diciembre","detalle":"La capacitación es una licitación del SSA programada para diciembre. Mientras tanto aporta 0 al cumplimiento. Con 100% en I5, CAG llegaría a 52,1% (sin descuento) y CPA a 55,3% (sin descuento) en el método resultado × peso.","accion":"Asegurar la ejecución y el informe del SSA antes del corte del 31 de diciembre."},{"n":5,"tipo":"Indicador","hallazgo":"I5: fórmula según año de implementación","detalle":"La resolución usa personas capacitadas / contratadas el 1° año (primer año calendario completo) y funcionarios capacitados / definidos desde el 2° año. La planilla usa la fórmula del 2° año. AIDIA Aysén inició a mediados de 2026, por lo que su 1° año completo sería 2027.","accion":"Confirmar con el referente MINSAL qué fórmula y denominador corresponde a cada dispositivo en 2026."},{"n":6,"tipo":"Indicador","hallazgo":"I1 TEA: línea base con registro local","detalle":"Meta 'Línea base' y medio de verificación 'Registro local' (informe base local). La fórmula pide 'NNA evaluados por TEA en el año'; la planilla usa la columna 'Sospecha TEA (Médico)'. CAG registra 0 confirmados de 14 y CPA 11 de 12.","accion":"Verificar que la columna usada corresponda a NNA evaluados, y si en CAG hay confirmaciones pendientes de registro."},{"n":7,"tipo":"Registro","hallazgo":"Participación en comunidad muy baja (1 de 78 ingresos en la red)","detalle":"CAG 1 caso (septiembre), CPA 0. Meta 30%, fuente REM A28. Es un indicador de resultado que suele registrarse al egreso.","accion":"Revisar el registro en REM A28 y el criterio de 'recupera o fortalece participación'."},{"n":8,"tipo":"Resuelto","hallazgo":"Etiquetas de ingresos de AIDIA Aysén","detalle":"Las filas 'Hombres' y 'Mujeres' correspondían a 'Ingreso total' e 'Ingreso con PTI'. Corregido en la planilla entregada junto al tablero.","accion":""},{"n":9,"tipo":"Resuelto","hallazgo":"AIDIA Aysén funciona desde mediados de 2026","detalle":"Los meses de enero a julio en 0 son reales: el dispositivo aún no funcionaba. Sus datos son del año en curso.","accion":""},{"n":10,"tipo":"Indicador","hallazgo":"I4 altas: la planilla divide por ingreso total, no por ingresos con PTI","detalle":"En 'Indicador 4' el denominador suma las filas 3 y 25 de 'Tendencia Ingresos' (ingreso total). La resolución pide ingresos con PTI (filas 4 y 26). Hoy no cambia el resultado porque 100% de los ingresos tiene PTI; el tablero ya usa ingresos con PTI.","accion":"Cambiar E2 a =SUMA('Tendencia Ingresos'!B4:M4) y E3 a =SUMA('Tendencia Ingresos'!B26:M26), y el rótulo E1 a 'Ingresos con PTI'."},{"n":11,"tipo":"Resuelto","hallazgo":"Tramos de descuento","detalle":"La tabla de la resolución coincide con la hoja META: 50% o más sin descuento; 40–49,9% 50%; 30–39,9% 75%; menos de 30% 100%.","accion":""},{"n":12,"tipo":"Registro","hallazgo":"Actividad grupal sin unidad definida","detalle":"No se sabe si son sesiones o personas. No es indicador de la resolución; se muestra solo como tendencia.","accion":"Definir la unidad en la planilla."},{"tipo":"Registro","hallazgo":"Fórmulas sin protección ante denominador 0","detalle":"Las columnas F de las hojas Indicador dividen sin control: un dispositivo sin ingresos (como CPA antes de agosto) daría #¡DIV/0! y rompería la suma de la hoja META.","accion":"Usar =SI.ERROR((D2/E2)*100;0) en las columnas F.","n":13},{"tipo":"Registro","hallazgo":"Metas en fracción y resultados en porcentaje","detalle":"La columna A guarda la meta como 0,3 / 0,75 / 0,4 / 1, y la columna F el resultado como 2,3 / 100. Hoy no afecta porque la meta no entra en el cálculo, pero sí al agregar una columna de logro.","accion":"Si se agrega logro: =MIN(F2/(A2*100);1)*G2.","n":14}],"norma":"Res. Exenta N° 959 de 01-12-2025, MINSAL"}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  const PUBLICADOS = JSON.parse(document.getElementById('datos').textContent);
+  let DATOS = PUBLICADOS, CALC = null, preview = false;
+  const st = { corte: null, metodo: 'planilla', tab: 'situacion' };
+
+  /* ---------- Formato ---------- */
+  const L = d3.formatLocale({ decimal: ',', thousands: '.', grouping: [3], currency: ['$', ''] });
+  const f1 = L.format(',.1f'), f0 = L.format(',.0f');
+  const int = (v) => (Math.abs(v) < 10000 ? String(Math.round(v)) : f0(v));
+  const p1 = (v) => f1(v) + '%', p0 = (v) => f0(v) + '%';
+  const MES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const MESC = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+  const mesLargo = (c) => MES[Number(c.slice(5, 7)) - 1] + ' ' + c.slice(0, 4);
+  const mesCorto = (c) => MESC[Number(c.slice(5, 7)) - 1];
+  const COL = { ok: 'var(--ok)', warn: 'var(--warn)', bad: 'var(--bad)', info: 'var(--info)', sec: 'var(--sec)' };
+  const tramoColor = (t) => (t === 'Sin descuento' ? 'ok' : t === 'Descuento 50%' ? 'warn' : 'bad');
+  const estadoColor = (e) => (e === 'Cumple meta' ? 'ok' : e === 'Cerca de la meta' ? 'warn' : e === 'Línea base' || e === 'Programado' ? 'info' : e === 'Sin dato' ? 'sec' : 'bad');
+  const $ = (id) => document.getElementById(id);
+  const txt = (v, f) => (v === null || v === undefined ? '—' : f(v));
+
+  /* ---------- Cálculo ---------- */
+  function calcular(D) {
+    const r1 = (v) => Math.round(v * 10) / 10;
+    const wilson = (x, n) => { const z = 1.96, p = x / n, d = 1 + z * z / n, c = p + z * z / (2 * n), h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)); return [r1((c - h) / d * 100), r1((c + h) / d * 100)]; };
+    const nombre = new Map(D.establecimientos.map((e) => [e.establecimiento, e.nombre]));
+    const ests = D.establecimientos.map((e) => e.establecimiento);
+    const meses = Array.from(new Set(D.mensual.map((r) => r.mes))).sort();
+    const ind = [];
+    meses.forEach((corte) => {
+      const ult = new Map();
+      ests.forEach((e) => { const c = D.anual.filter((r) => r.establecimiento === e && r.corte <= corte).sort((a, b) => (a.corte < b.corte ? 1 : -1))[0]; if (c) ult.set(e, c); });
+      ests.concat(['Red']).forEach((e) => {
+        const grupo = e === 'Red' ? ests : [e];
+        D.indicadores.forEach((d) => {
+          let x = 0, n = 0, hay = false;
+          grupo.forEach((g) => {
+            if (d.fuente === 'anual') { const c = ult.get(g); if (c) { hay = true; x += Number(c[d.num]); n += Number(c[d.den]); } }
+            else D.mensual.filter((r) => r.establecimiento === g && r.mes <= corte).forEach((r) => { hay = true; x += Number(r[d.num]); n += Number(r[d.den]); });
+          });
+          const meta = d.meta === null || d.meta === '' ? null : Number(d.meta), peso = Number(d.peso);
+          const ok = hay && n > 0, pct = ok ? x / n * 100 : null, ic = ok ? wilson(x, n) : [null, null];
+          const programado = d.programado && corte < d.programado && x === 0;
+          const estado = !ok ? 'Sin dato' : programado ? 'Programado' : meta === null ? 'Línea base' : pct >= meta ? 'Cumple meta' : pct >= 0.8 * meta ? 'Cerca de la meta' : 'Bajo la meta';
+          ind.push({ medio: d.medio || '', programado: d.programado || null, corte, establecimiento: e, nombre: e === 'Red' ? 'Red AIDIA' : (nombre.get(e) || e), ind: d.ind, indicador: d.indicador, corto: d.corto, unidad: d.unidad,
+            num: hay ? x : null, den: hay ? n : null, pctx: pct, pct: ok ? r1(pct) : null, meta, peso,
+            logro: ok && meta !== null ? r1(Math.min(pct / meta, 1) * 100) : null,
+            brecha: ok && meta !== null ? Math.max(0, Math.ceil(meta / 100 * n - 1e-9) - x) : null, ic_inf: ic[0], ic_sup: ic[1], estado });
+        });
+      });
+    });
+    const T = D.tramos.map((t) => ({ desde: Number(t.desde), tramo: t.tramo })).sort((a, b) => b.desde - a.desde);
+    const tramo = (c) => (T.find((t) => c >= t.desde - 1e-9) || T[T.length - 1]).tramo;
+    const acc = new Map();
+    ind.filter((r) => r.establecimiento !== 'Red').forEach((r) => {
+      const k = r.corte + '|' + r.establecimiento;
+      const a = acc.get(k) || { corte: r.corte, establecimiento: r.establecimiento, nombre: r.nombre, p: 0, m: 0 };
+      const pct = r.pctx || 0;
+      a.p += pct * r.peso / 100; a.m += r.meta === null ? pct * r.peso / 100 : Math.min(pct / r.meta, 1) * r.peso; acc.set(k, a);
+    });
+    const cum = [];
+    ['planilla', 'meta'].forEach((metodo) => acc.forEach((a) => {
+      const prev = meses[meses.indexOf(a.corte) - 1], pa = prev ? acc.get(prev + '|' + a.establecimiento) : null;
+      const v = metodo === 'planilla' ? a.p : a.m, va = pa ? (metodo === 'planilla' ? pa.p : pa.m) : null;
+      cum.push({ corte: a.corte, metodo, establecimiento: a.establecimiento, nombre: a.nombre, cumpl: r1(v), tramo: tramo(v), cumpl_anterior: va === null ? null : r1(va), tramo_anterior: va === null ? null : tramo(va), hay_anterior: !!prev });
+    }));
+    return { meses, ind, cum, T };
+  }
+
+  /* ---------- Piezas visuales ---------- */
+  const NS = 'http://www.w3.org/2000/svg';
+  function icon(kind, s) {
+    s = s || 16;
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('width', s); svg.setAttribute('height', s); svg.setAttribute('viewBox', '0 0 16 16'); svg.setAttribute('aria-hidden', 'true'); svg.style.flex = '0 0 auto';
+    const add = (tag, at) => { const e = document.createElementNS(NS, tag); Object.entries(at).forEach(([k, v]) => e.setAttribute(k, v)); svg.appendChild(e); };
+    const c = COL[kind] || COL.sec;
+    if (kind === 'warn') { add('path', { d: 'M8 1.2 15.2 14.4H.8Z', fill: c }); add('path', { d: 'M8 5.6v4.2', stroke: '#111', 'stroke-width': '1.8', 'stroke-linecap': 'round' }); add('circle', { cx: '8', cy: '12.2', r: '1', fill: '#111' }); }
+    else {
+      add('circle', { cx: '8', cy: '8', r: '7.2', fill: c });
+      if (kind === 'ok') add('path', { d: 'M4.6 8.3 7 10.6l4.4-4.9', stroke: '#fff', 'stroke-width': '2', fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+      else if (kind === 'bad') add('path', { d: 'M5.4 5.4l5.2 5.2M10.6 5.4l-5.2 5.2', stroke: '#fff', 'stroke-width': '2', 'stroke-linecap': 'round' });
+      else { add('path', { d: 'M8 7.2v4.2', stroke: '#fff', 'stroke-width': '1.8', 'stroke-linecap': 'round' }); add('circle', { cx: '8', cy: '4.9', r: '1', fill: '#fff' }); }
+    }
+    return svg;
+  }
+  const status = (el, kind, t) => { el.textContent = ''; el.appendChild(icon(kind, 16)); const s = document.createElement('span'); s.textContent = t; el.appendChild(s); };
+  const pill = (kind, t) => { const p = document.createElement('span'); p.className = 'pill'; p.style.borderColor = COL[kind]; p.style.background = 'color-mix(in srgb, ' + COL[kind] + ' 14%, transparent)'; p.appendChild(icon(kind, 14)); const s = document.createElement('span'); s.textContent = t; p.appendChild(s); return p; };
+  const tipOf = (box) => { let t = box.querySelector(':scope > .tip'); if (!t) { t = document.createElement('div'); t.className = 'tip'; box.appendChild(t); } return t; };
+  const show = (box, tip, ev, title, lines) => {
+    tip.textContent = ''; const h = document.createElement('div'); h.className = 't'; h.textContent = title; tip.appendChild(h);
+    lines.forEach((l) => { const d = document.createElement('div'); d.textContent = l; tip.appendChild(d); });
+    const r = box.getBoundingClientRect(); let x = ev.clientX - r.left + 12; const y = ev.clientY - r.top + 12;
+    tip.style.opacity = 1; const tw = tip.offsetWidth; if (x + tw > r.width) x = Math.max(0, ev.clientX - r.left - tw - 12);
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  };
+  const hide = (tip) => { tip.style.opacity = 0; };
+  const row = (tb, cells, cls) => { const tr = document.createElement('tr'); if (cls) tr.className = cls; cells.forEach(([v, c]) => { const td = document.createElement('td'); if (v instanceof Node) td.appendChild(v); else td.textContent = v; if (c) td.className = c; tr.appendChild(td); }); tb.appendChild(tr); };
+  const svgOf = (box, W, H, label) => d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('height', H).attr('role', 'img').attr('aria-label', label);
+  const pctTxt = (r) => (r.pct === null ? 'sin dato' : p1(r.pct));
+
+  /* ---------- Render ---------- */
+  function render() {
+    const C = CALC, corte = st.corte, metodo = st.metodo;
+    // Encabezado y filtros
+    const a = C.meses[0], b = C.meses[C.meses.length - 1];
+    $('h-periodo').textContent = MES[Number(a.slice(5, 7)) - 1] + ' a ' + mesLargo(b);
+    $('h-fecha').textContent = DATOS.carga.fecha_carga; $('h-archivo').textContent = DATOS.carga.archivo; $('h-preview').hidden = !preview;
+    const fc = $('f-corte'); fc.textContent = '';
+    C.meses.forEach((m) => { const bt = document.createElement('button'); bt.type = 'button'; bt.id = 'c-' + m; bt.dataset.corte = m; bt.textContent = mesCorto(m); bt.setAttribute('aria-label', 'Corte a ' + mesLargo(m)); bt.setAttribute('aria-pressed', String(m === corte)); fc.appendChild(bt); });
+    document.querySelectorAll('#f-metodo button').forEach((bt) => bt.setAttribute('aria-pressed', String(bt.dataset.metodo === metodo)));
+    $('badge').textContent = ''; $('badge').append('Viendo: '); const bb = document.createElement('b'); bb.textContent = 'enero a ' + mesLargo(corte) + ' · método ' + (metodo === 'meta' ? 'logro vs meta' : 'resultado × peso'); $('badge').append(bb);
+    ['situacion', 'brechas', 'detalle', 'actualizar'].forEach((t) => { $(t).hidden = t !== st.tab; $('tab-' + t).setAttribute('aria-selected', String(t === st.tab)); });
+
+    const cum = C.cum.filter((r) => r.corte === corte && r.metodo === metodo).sort((x, y) => y.cumpl - x.cumpl);
+    const red = C.ind.filter((r) => r.corte === corte && r.establecimiento === 'Red');
+    const est = C.ind.filter((r) => r.corte === corte && r.establecimiento !== 'Red');
+    const sin = cum.filter((r) => r.tramo === 'Sin descuento').length, tot = cum.length;
+    const peor = red.filter((r) => r.logro !== null && r.estado !== 'Programado').sort((x, y) => x.logro - y.logro || x.pct - y.pct)[0];
+
+    // Mensaje
+    const m = $('mensaje'); m.textContent = '';
+    const B = (t) => { const e = document.createElement('b'); e.textContent = t; return e; };
+    m.append('Con datos de ', B('enero a ' + mesLargo(corte)), ', ', B(String(sin)), ' de ', B(String(tot)), ' dispositivos AIDIA quedan sin descuento con el método seleccionado. ');
+    const camb = cum.filter((r) => r.tramo_anterior && r.tramo !== r.tramo_anterior).length;
+    if (cum[0] && cum[0].hay_anterior) m.append(camb === 0 ? 'Ninguno cambia de tramo respecto del mes anterior. ' : camb + (camb === 1 ? ' cambia' : ' cambian') + ' de tramo respecto del mes anterior. ');
+    if (peor) m.append('El indicador más rezagado de la red es ', B(peor.indicador), ', con ', B(p1(peor.pct)), ' frente a una meta de ', B(peor.meta + '%'), '.');
+
+    // KPI
+    const kind1 = sin === tot ? 'ok' : sin * 2 >= tot ? 'warn' : 'bad';
+    $('k1').style.borderLeftColor = COL[kind1]; $('k1v').textContent = ''; $('k1v').append(String(sin) + ' '); const sm = document.createElement('small'); sm.textContent = 'de ' + tot; $('k1v').append(sm);
+    status($('k1s'), kind1, kind1 === 'ok' ? 'Ambos sin descuento' : (tot - sin) + ' con descuento (referencial)');
+    $('k1c').textContent = cum.map((r) => r.establecimiento + ' ' + p1(r.cumpl)).join(' · ');
+    if (peor) { const k = estadoColor(peor.estado); $('k2').style.borderLeftColor = COL[k]; $('k2v').textContent = p1(peor.pct); status($('k2s'), k, peor.indicador + ' · meta ' + peor.meta + '%'); $('k2c').textContent = 'Faltan ' + int(peor.brecha) + ' ' + peor.unidad + ' en la red para la meta.'; }
+    const ing = red.find((r) => r.ind === 'I3'), tea = red.find((r) => r.ind === 'I1');
+    $('k3v').textContent = ing ? int(ing.den || 0) : '—'; status($('k3s'), 'info', 'Enero a ' + mesLargo(corte));
+    $('k3c').textContent = ing && ing.pct !== null ? p1(ing.pct) + ' con Plan de Tratamiento Integral (' + int(ing.num) + ' NNA).' : 'Sin ingresos en el período.';
+    $('k4v').textContent = tea ? pctTxt(tea) : '—';
+    status($('k4s'), tea && tea.pct !== null ? 'info' : 'sec', tea && tea.pct !== null ? 'Línea base · sin meta' : 'Sin dato informado a este corte');
+    $('k4c').textContent = tea && tea.pct !== null ? int(tea.num) + ' confirmados de ' + int(tea.den) + ' evaluados en la red.' : '';
+    $('q-tramos').textContent = C.T.map((t, i) => (i === 0 ? t.desde + '% o más' : t.desde > 0 ? t.desde + '% a ' + String(C.T[i - 1].desde - 0.1).replace('.', ',') + '%' : 'menos de ' + C.T[i - 1].desde + '%') + ': ' + t.tramo.toLowerCase()).join(' · ') + '.';
+
+    if (st.tab === 'situacion') { drawSemaforo(cum, C.T); drawBullets(red); }
+    // Tabla faltan (siempre)
+    const tf = $('t-faltan').tBodies[0]; tf.textContent = '';
+    est.filter((r) => r.brecha > 0).sort((x, y) => y.brecha - x.brecha).forEach((r) => row(tf, [[r.nombre], [r.indicador], [p1(r.pct), 'n'], [r.meta + '%', 'n'], [int(r.brecha) + ' ' + r.unidad, 'n'], [pill(estadoColor(r.estado), r.estado)]]));
+    if (st.tab === 'brechas') { drawMatriz(est); drawTendencia(); }
+    // Detalle
+    const tc = $('t-cambio').tBodies[0]; tc.textContent = '';
+    cum.forEach((r) => { const tn = document.createElement('span'); tn.appendChild(pill(tramoColor(r.tramo), r.tramo)); if (r.tramo_anterior && r.tramo !== r.tramo_anterior) { const s = document.createElement('b'); s.textContent = ' cambia'; tn.appendChild(s); }
+      row(tc, [[r.nombre], [txt(r.cumpl_anterior, p1), 'n'], [p1(r.cumpl), 'n'], [r.tramo_anterior ? pill(tramoColor(r.tramo_anterior), r.tramo_anterior) : '—'], [tn]]); });
+    const td = $('t-detalle').tBodies[0]; td.textContent = '';
+    C.ind.filter((r) => r.corte === corte).forEach((r) => row(td, [[r.nombre], [r.ind], [txt(r.num, int), 'n'], [txt(r.den, int), 'n'], [txt(r.pct, p1), 'n'], [txt(r.ic_inf, p1), 'n hide-narrow'], [txt(r.ic_sup, p1), 'n hide-narrow'], [r.meta === null ? 'Línea base' : r.meta + '%', 'n'], [String(r.peso), 'n'], [txt(r.logro, p0), 'n'], [txt(r.brecha, int), 'n']], r.establecimiento === 'Red' ? 'red' : ''));
+    const tq = $('t-calidad').tBodies[0]; tq.textContent = '';
+    (DATOS.calidad || []).forEach((r) => { let tipo; if (r.tipo === 'Resuelto') tipo = pill('ok', r.tipo); else if (['Método de cálculo', 'Normativa', 'Indicador'].includes(r.tipo)) tipo = pill('bad', r.tipo); else { tipo = document.createElement('span'); tipo.className = 'tag'; tipo.textContent = r.tipo; }
+      row(tq, [[String(r.n), 'n'], [tipo], [r.hallazgo], [r.detalle, 'wide hide-narrow'], [r.accion || '—', 'wide']]); });
+    $('json').value = JSON.stringify(DATOS);
+  }
+
+  function drawSemaforo(rows, T) {
+    const box = $('semaforo'); box.textContent = '';
+    const W = box.clientWidth || 500, narrow = W < 520, rowH = narrow ? 58 : 50, top = 22;
+    const meas = d3.select(box).append('svg').attr('width', 0).attr('height', 0); let lw = 0, vw = 0;
+    rows.forEach((r) => { lw = Math.max(lw, meas.append('text').attr('font-size', 12).text(r.nombre).node().getComputedTextLength()); vw = Math.max(vw, meas.append('text').attr('font-size', 12).attr('font-weight', 600).text(p1(r.cumpl) + ' ' + r.tramo).node().getComputedTextLength()); });
+    meas.remove();
+    const ml = narrow ? 0 : lw + 10, mr = vw + 30, H = top + rows.length * rowH + 4;
+    const svg = svgOf(box, W, H, 'Cumplimiento por dispositivo: ' + rows.map((r) => r.nombre + ' ' + p1(r.cumpl) + ', ' + r.tramo).join('; '));
+    const x = d3.scaleLinear([0, 100], [ml, Math.max(ml + 60, W - mr)]);
+    const y = d3.scaleBand(rows.map((r) => r.establecimiento), [top, top + rows.length * rowH]).paddingInner(narrow ? 0.62 : 0.34).paddingOuter(narrow ? 0.5 : 0.3).align(narrow ? 1 : 0.5);
+    T.filter((t) => t.desde > 0).forEach((t) => {
+      svg.append('line').attr('x1', x(t.desde)).attr('x2', x(t.desde)).attr('y1', top - 4).attr('y2', H - 2).attr('stroke', 'var(--muted)').attr('stroke-opacity', 0.6).attr('stroke-dasharray', '4 3');
+      svg.append('text').attr('x', x(t.desde)).attr('y', 12).attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', 'var(--muted)').text(t.desde + '%');
+    });
+    const tip = tipOf(box);
+    rows.forEach((r) => {
+      const kind = tramoColor(r.tramo), cy = y(r.establecimiento) + y.bandwidth() / 2, g = svg.append('g');
+      if (narrow) g.append('text').attr('x', 0).attr('y', y(r.establecimiento) - 5).attr('font-size', 12).attr('fill', 'var(--fg)').text(r.nombre);
+      else g.append('text').attr('x', ml - 8).attr('y', cy).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--fg)').text(r.nombre);
+      g.append('rect').attr('x', x(0)).attr('y', y(r.establecimiento)).attr('width', x(100) - x(0)).attr('height', y.bandwidth()).attr('rx', 4).attr('fill', 'var(--line)').attr('fill-opacity', 0.5);
+      g.append('rect').attr('x', x(0)).attr('y', y(r.establecimiento)).attr('width', Math.max(2, x(r.cumpl) - x(0))).attr('height', y.bandwidth()).attr('rx', 4).attr('fill', COL[kind]);
+      const ic = icon(kind, 14); ic.setAttribute('x', x(r.cumpl) + 6); ic.setAttribute('y', cy - 7); g.node().appendChild(ic);
+      g.append('text').attr('x', x(r.cumpl) + 24).attr('y', cy).attr('dy', '0.35em').attr('font-size', 12).attr('font-weight', 600).attr('fill', 'var(--fg)').style('font-variant-numeric', 'tabular-nums').text(p1(r.cumpl) + ' ' + r.tramo);
+      g.append('rect').attr('x', 0).attr('y', y(r.establecimiento) - 6).attr('width', W).attr('height', y.bandwidth() + 12).attr('fill', 'transparent')
+        .on('mousemove', (ev) => show(box, tip, ev, r.nombre, ['Cumplimiento: ' + p1(r.cumpl) + ' · ' + r.tramo].concat(r.cumpl_anterior === null ? [] : ['Mes anterior: ' + p1(r.cumpl_anterior) + ' · ' + r.tramo_anterior]))).on('mouseleave', () => hide(tip));
+    });
+  }
+
+  function drawBullets(red) {
+    const box = $('bullets'); box.textContent = '';
+    const W = box.clientWidth || 500, rowH = 74, H = red.length * rowH;
+    const svg = svgOf(box, W, H, 'Indicadores de la red: ' + red.map((r) => r.indicador + ' ' + pctTxt(r) + ', ' + r.estado).join('; '));
+    const x = d3.scaleLinear([0, 100], [0, W - 8]), tip = tipOf(box);
+    red.forEach((r, i) => {
+      const kind = estadoColor(r.estado), y0 = i * rowH, g = svg.append('g');
+      g.append('text').attr('x', 0).attr('y', y0 + 14).attr('font-size', 13).attr('font-weight', 600).attr('fill', 'var(--fg)').text(r.indicador + ' · peso ' + r.peso);
+      const ic = icon(kind, 14); ic.setAttribute('x', 0); ic.setAttribute('y', y0 + 22); g.node().appendChild(ic);
+      g.append('text').attr('x', 20).attr('y', y0 + 33).attr('font-size', 12).attr('fill', 'var(--fg)').style('font-variant-numeric', 'tabular-nums').text(pctTxt(r) + ' · ' + r.estado + (r.brecha > 0 ? ' · faltan ' + int(r.brecha) + ' ' + r.unidad : ''));
+      g.append('rect').attr('x', x(0)).attr('y', y0 + 42).attr('width', x(100) - x(0)).attr('height', 14).attr('rx', 4).attr('fill', 'var(--line)').attr('fill-opacity', 0.5);
+      if (r.pct !== null) g.append('rect').attr('x', x(0)).attr('y', y0 + 42).attr('width', Math.max(2, x(Math.min(r.pct, 100)) - x(0))).attr('height', 14).attr('rx', 4).attr('fill', COL[kind]);
+      if (r.meta !== null) {
+        g.append('line').attr('x1', x(r.meta)).attr('x2', x(r.meta)).attr('y1', y0 + 38).attr('y2', y0 + 60).attr('stroke', 'var(--fg)').attr('stroke-width', 2);
+        const mt = g.append('text').attr('x', x(r.meta)).attr('y', y0 + 71).attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', 'var(--muted)').text('meta ' + r.meta + '%');
+        if (x(r.meta) + mt.node().getComputedTextLength() / 2 > W) mt.attr('text-anchor', 'end');
+      } else g.append('text').attr('x', 0).attr('y', y0 + 71).attr('font-size', 12).attr('fill', 'var(--muted)').text('línea base: sin meta');
+      g.append('rect').attr('x', 0).attr('y', y0).attr('width', W).attr('height', rowH - 4).attr('fill', 'transparent')
+        .on('mousemove', (ev) => show(box, tip, ev, r.indicador + ' · red', [r.pct === null ? 'Sin dato al corte' : int(r.num) + ' de ' + int(r.den) + ' = ' + p1(r.pct), (r.meta === null ? 'Línea base' : 'Meta ' + r.meta + '%') + ' · ' + r.estado, 'Verificación: ' + r.medio])).on('mouseleave', () => hide(tip));
+    });
+  }
+
+  function drawMatriz(rows) {
+    const box = $('matriz'); box.textContent = '';
+    const defs = Array.from(new Map(rows.map((r) => [r.ind, r])).values()), inds = defs.map((d) => d.ind), est = Array.from(new Map(rows.map((r) => [r.establecimiento, r.nombre])));
+    const W = box.clientWidth || 600, narrow = W < 560;
+    const meas = d3.select(box).append('svg').attr('width', 0).attr('height', 0); let lw = 0;
+    est.forEach(([, n]) => { lw = Math.max(lw, meas.append('text').attr('font-size', 12).text(n).node().getComputedTextLength()); }); meas.remove();
+    const ml = narrow ? 0 : lw + 10, top = 40, cH = 44, lab = narrow ? 18 : 0, H = top + est.length * (cH + lab) + 2;
+    const svg = svgOf(box, W, H, 'Matriz de indicadores por dispositivo');
+    const x = d3.scaleBand(inds, [ml, W]).padding(0.06), yT = (i) => top + i * (cH + lab) + lab;
+    defs.forEach((d) => {
+      const t = svg.append('text').attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', 'var(--fg)');
+      t.append('tspan').attr('x', x(d.ind) + x.bandwidth() / 2).attr('y', 14).attr('font-weight', 600).text(x.bandwidth() > 100 ? d.ind + ' ' + d.corto : d.ind);
+      t.append('tspan').attr('x', x(d.ind) + x.bandwidth() / 2).attr('dy', '1.25em').attr('fill', 'var(--muted)').text(d.meta === null ? 'línea base' : 'meta ' + d.meta + '%');
+    });
+    est.forEach(([, n], i) => { if (narrow) svg.append('text').attr('x', 0).attr('y', yT(i) - 5).attr('font-size', 12).attr('fill', 'var(--fg)').text(n); else svg.append('text').attr('x', ml - 8).attr('y', yT(i) + cH / 2).attr('dy', '0.35em').attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--fg)').text(n); });
+    const tip = tipOf(box);
+    rows.forEach((r) => {
+      const kind = estadoColor(r.estado), cx = x(r.ind), i = est.findIndex(([e]) => e === r.establecimiento), cy = yT(i) + 3, ch = cH - 6, g = svg.append('g');
+      g.append('rect').attr('x', cx).attr('y', cy).attr('width', x.bandwidth()).attr('height', ch).attr('rx', 4).attr('fill', COL[kind]).attr('fill-opacity', 0.16).attr('stroke', COL[kind]).attr('stroke-width', 1.5);
+      const t = g.append('text').attr('font-size', 13).attr('font-weight', 600).attr('fill', 'var(--fg)').style('font-variant-numeric', 'tabular-nums').attr('dy', '0.35em').attr('y', cy + ch / 2).text(r.pct === null ? '—' : p0(r.pct));
+      const tw = t.node().getComputedTextLength(), gx = cx + (x.bandwidth() - tw - 20) / 2; t.attr('x', gx + 20);
+      const ic = icon(kind, 14); ic.setAttribute('x', gx); ic.setAttribute('y', cy + ch / 2 - 7); g.node().appendChild(ic);
+      g.on('mousemove', (ev) => show(box, tip, ev, r.nombre + ' · ' + r.indicador, [r.pct === null ? 'Sin dato al corte' : int(r.num) + ' de ' + int(r.den) + ' = ' + p1(r.pct), (r.meta === null ? 'Línea base' : 'Meta ' + r.meta + '%') + ' · ' + r.estado].concat(r.brecha > 0 ? ['Faltan ' + int(r.brecha) + ' ' + r.unidad] : []))).on('mouseleave', () => hide(tip));
+    });
+  }
+
+  function drawTendencia() {
+    const box = $('tendencia'); box.textContent = '';
+    const ests = DATOS.establecimientos, codes = ests.map((e) => e.establecimiento), colors = ['var(--accent)', 'var(--s2)'];
+    const lg = $('leg-tend'); lg.textContent = '';
+    ests.forEach((e, i) => { const s = document.createElement('span'); const w = document.createElement('span'); w.className = 'sw'; w.style.background = colors[i % 2]; s.append(w, e.nombre); lg.appendChild(s); });
+    const data = DATOS.mensual, meses = CALC.meses, nom = new Map(ests.map((e) => [e.establecimiento, e.nombre]));
+    const W = box.clientWidth || 500, cols = W < 420 ? 1 : 2, pw = (W - (cols - 1) * 20) / cols, ph = 130;
+    const wrap = d3.select(box).append('div').style('display', 'grid').style('grid-template-columns', `repeat(${cols}, 1fr)`).style('gap', '16px 20px');
+    const tip = tipOf(box);
+    [['ingresos', 'Ingresos'], ['altas', 'Altas terapéuticas'], ['grupal', 'Actividad grupal'], ['participacion', 'Participación en comunidad']].forEach(([k, lab]) => {
+      const s = wrap.append('div').append('svg').attr('width', '100%').attr('viewBox', `0 0 ${pw} ${ph}`).attr('height', ph).attr('role', 'img').attr('aria-label', lab + ' por mes y dispositivo');
+      s.append('text').attr('x', 0).attr('y', 12).attr('font-size', 12).attr('font-weight', 600).attr('fill', 'var(--fg)').text(lab);
+      const x = d3.scaleBand(meses, [0, pw]).padding(0.2), xi = d3.scaleBand(codes, [0, x.bandwidth()]).padding(0.08);
+      const mx = d3.max(data, (r) => Number(r[k])) || 1, y = d3.scaleLinear([0, mx], [ph - 16, 30]);
+      s.append('text').attr('x', pw).attr('y', 12).attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--muted)').text('máx. ' + int(mx));
+      s.append('line').attr('x1', 0).attr('x2', pw).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', 'var(--line)');
+      meses.forEach((m, i) => {
+        const isC = m === st.corte, after = m > st.corte;
+        codes.forEach((c, j) => { const r = data.find((q) => q.mes === m && q.establecimiento === c); if (!r) return;
+          s.append('rect').attr('x', x(m) + xi(c)).attr('y', y(Number(r[k]))).attr('width', xi.bandwidth()).attr('height', Math.max(0, y(0) - y(Number(r[k])))).attr('rx', 2).attr('fill', colors[j % 2]).attr('opacity', after ? 0.25 : 1); });
+        s.append('rect').attr('x', x(m)).attr('y', 20).attr('width', x.bandwidth()).attr('height', ph - 36).attr('fill', 'transparent')
+          .on('mousemove', (ev) => show(box, tip, ev, mesLargo(m) + ' · ' + lab, codes.map((c) => { const r = data.find((q) => q.mes === m && q.establecimiento === c); return nom.get(c) + ': ' + (r ? int(Number(r[k])) : '—'); }))).on('mouseleave', () => hide(tip));
+        if (isC || x.bandwidth() > 26 || i % 2 === 0) s.append('text').attr('x', x(m) + x.bandwidth() / 2).attr('y', ph - 3).attr('text-anchor', 'middle').attr('font-size', 12).attr('font-weight', isC ? 600 : 400).attr('fill', isC ? 'var(--fg)' : 'var(--muted)').text(mesCorto(m));
+      });
+    });
+  }
+
+  /* ---------- Lectura de la planilla Excel (misma estructura que la de septiembre) ---------- */
+  function leerPlanilla(wb, nombreArchivo) {
+    const hoja = (n) => { const k = wb.SheetNames.find((s) => s.trim().toLowerCase() === n.toLowerCase()); if (!k) throw new Error('No encuentro la hoja “' + n + '”.'); return XLSX.utils.sheet_to_json(wb.Sheets[k], { header: 1, defval: null }); };
+    const bloque = (filas, rotulo) => { const i = filas.findIndex((f) => f && typeof f[1] === 'string' && f[1].trim().toUpperCase() === rotulo); if (i < 0) throw new Error('No encuentro el bloque “' + rotulo + '”.'); return i; };
+    const meses12 = (f) => Array.from({ length: 12 }, (_, m) => f ? f[1 + m] : null);
+    const fuentes = { ingresos: ['Tendencia Ingresos', 2], ingresos_pti: ['Tendencia Ingresos', 3], altas: ['Tendencia Altas', 2], grupal: ['Tendencia Act. Grupal', 2], participacion: ['Atendencia Inclusión', 2] };
+    const rot = { CAG: 'AIDIA COYHAIQUE', CPA: 'AIDIA AYSÉN' };
+    const anio = PUBLICADOS.mensual[0].mes.slice(0, 4);
+    const mensual = [];
+    const series = {};
+    Object.entries(rot).forEach(([e, r]) => { series[e] = {}; Object.entries(fuentes).forEach(([k, [h, off]]) => { const f = hoja(h); series[e][k] = meses12(f[bloque(f, r) + off]); }); });
+    for (let m = 0; m < 12; m++) Object.keys(rot).forEach((e) => {
+      const v = Object.fromEntries(Object.keys(fuentes).map((k) => [k, series[e][k][m]]));
+      if (Object.values(v).every((x) => x === null || x === '')) return;
+      const o = { mes: anio + '-' + String(m + 1).padStart(2, '0'), establecimiento: e };
+      Object.entries(v).forEach(([k, x]) => { const n = Number(x || 0); if (!Number.isFinite(n)) throw new Error('Valor no numérico en ' + k + ', ' + e + ', mes ' + (m + 1) + '.'); o[k] = n; });
+      mensual.push(o);
+    });
+    if (!mensual.length) throw new Error('La planilla no tiene meses con datos.');
+    const ultimo = mensual.map((r) => r.mes).sort().pop();
+    const i1 = hoja('Indicador 1'), i5 = hoja('Indicador 5'), filaDe = (h, cod) => h.find((f) => f && String(f[2]).trim() === cod);
+    const anual = PUBLICADOS.anual.filter((r) => r.corte < ultimo);
+    Object.keys(rot).forEach((e) => { const a = filaDe(i1, e), b = filaDe(i5, e); if (!a || !b) throw new Error('No encuentro ' + e + ' en Indicador 1 o 5.');
+      anual.push({ corte: ultimo, establecimiento: e, tea_confirmados: Number(a[3] || 0), tea_evaluados: Number(a[4] || 0), cap_capacitados: Number(b[3] || 0), cap_definidos: Number(b[4] || 0) }); });
+    const hoy = new Date(), fecha = String(hoy.getDate()).padStart(2, '0') + '-' + String(hoy.getMonth() + 1).padStart(2, '0') + '-' + hoy.getFullYear();
+    const avisos = [];
+    mensual.forEach((r) => { if (r.ingresos_pti > r.ingresos) avisos.push(r.establecimiento + ' ' + mesCorto(r.mes) + ': ingresos con PTI mayor que ingresos.'); });
+    return { datos: Object.assign({}, PUBLICADOS, { carga: { fecha_carga: fecha, archivo: nombreArchivo }, mensual, anual }), ultimo, avisos };
+  }
+
+  /* ---------- Eventos ---------- */
+  function setDatos(D, esPreview) { DATOS = D; preview = esPreview; CALC = calcular(D); if (!CALC.meses.includes(st.corte)) st.corte = CALC.meses[CALC.meses.length - 1]; render(); }
+  $('f-corte').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-corte]'); if (b) { st.corte = b.dataset.corte; render(); } });
+  $('f-metodo').addEventListener('click', (ev) => { const b = ev.target.closest('button[data-metodo]'); if (b) { st.metodo = b.dataset.metodo; render(); } });
+  const TABS = ['situacion', 'brechas', 'detalle', 'actualizar'];
+  TABS.forEach((t) => $('tab-' + t).addEventListener('click', () => { st.tab = t; try { history.replaceState(null, '', '#' + t); } catch (e) { /* sin historial */ } render(); }));
+  const fromHash = () => { const h = location.hash.slice(1); if (TABS.includes(h)) { st.tab = h; return true; } return false; };
+  window.addEventListener('hashchange', () => { if (fromHash()) render(); });
+  const msg = $('carga-msg');
+  $('archivo').addEventListener('change', (ev) => {
+    const f = ev.target.files[0]; if (!f) return;
+    msg.hidden = false; msg.className = 'msg'; msg.textContent = 'Leyendo ' + f.name + '…';
+    const rd = new FileReader();
+    rd.onload = () => {
+      try {
+        if (typeof XLSX === 'undefined') throw new Error('No se pudo cargar el lector de Excel. Revisa la conexión y vuelve a intentar.');
+        const r = leerPlanilla(XLSX.read(new Uint8Array(rd.result), { type: 'array' }), f.name);
+        setDatos(r.datos, true); st.corte = r.ultimo; render();
+        msg.textContent = 'Planilla leída: datos hasta ' + mesLargo(r.ultimo) + '. Revisa las pestañas y luego publica la actualización.' + (r.avisos.length ? ' Avisos: ' + r.avisos.join(' ') : '');
+      } catch (e) { msg.className = 'msg err'; msg.textContent = 'No se pudo leer la planilla: ' + e.message + ' Verifica que tenga la misma estructura que la planilla de monitoreo AIDIA.'; }
+    };
+    rd.readAsArrayBuffer(f);
+  });
+  $('volver').addEventListener('click', () => { $('archivo').value = ''; msg.hidden = true; setDatos(PUBLICADOS, false); });
+  $('copiar').addEventListener('click', () => {
+    const t = $('json').value, done = (ok) => { $('copiar-msg').textContent = ok ? 'Copiado.' : 'Selecciona el texto y cópialo con Ctrl+C.'; if (!ok) { $('json').focus(); $('json').select(); } };
+    try { navigator.clipboard.writeText(t).then(() => done(true), () => done(false)); } catch (e) { done(false); }
+  });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(render, 150); });
+  const leg = $('leg-matriz');
+  [['ok', 'Cumple meta'], ['warn', 'Cerca de la meta (80% o más)'], ['bad', 'Bajo la meta'], ['info', 'Línea base o programado'], ['sec', 'Sin dato']].forEach(([k, t]) => { const s = document.createElement('span'); s.appendChild(icon(k, 14)); s.append(t); leg.appendChild(s); });
+  fromHash();
+  setDatos(PUBLICADOS, false);
+})();
+</script>
