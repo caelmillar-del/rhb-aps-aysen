@@ -146,7 +146,7 @@ window.dash = (function () {
 <div class="rx" id="top">
   <header id="encabezado">
     <h1>Rehabilitación Integral en APS · Servicio de Salud Aysén</h1>
-    <p class="purpose">Indicadores del Programa de Rehabilitación Integral en 8 establecimientos de APS: resultado frente a la meta y brechas.</p>
+    <p class="purpose">Monitoreo del Programa de Rehabilitación Integral en 8 establecimientos de APS: cumplimiento, tramo de descuento y brechas por indicador.</p>
     <p class="meta-line">Datos de <b class="dash-skeleton" data-source="periodo" data-field="etiqueta" data-row="0">—</b>.</p>
   </header>
 
@@ -172,7 +172,6 @@ window.dash = (function () {
       El indicador más rezagado de la red es <b id="m-ind" data-source="ind_corte" data-field="indicador">—</b>, con <b id="m-pct" data-source="ind_corte" data-field="pct">—</b> frente a una meta de <b id="m-meta" data-source="ind_corte" data-field="meta">—</b>.
     </p>
 
-    <p class="insight" id="mensaje-pub" aria-live="polite" hidden></p>
     <div class="kpis" id="kpis">
       <div class="kpi" id="k1">
         <div class="lab" id="k1l">Establecimientos sin descuento</div>
@@ -195,7 +194,12 @@ window.dash = (function () {
     </div>
 
     <div class="row2">
-      
+      <div class="blk" id="blk-semaforo">
+        <h2>¿Qué establecimientos tienen descuento?</h2>
+        <p class="q">Cumplimiento ponderado de cada establecimiento y su tramo de descuento de la 2ª cuota. Verde: 60% o más, sin descuento. Amarillo: 40 a 59,9%, descuento de 50%. Rojo: menos de 40%, descuento de 75% o 100%.</p>
+        <p class="q-corto">Verde: 60% o más, sin descuento · Amarillo: 40 a 59,9%, descuento 50% · Rojo: menos de 40%, descuento 75 a 100%.</p>
+        <div class="chart" id="semaforo" data-source="cum_corte" style="min-height:20rem"></div>
+      </div>
       <div class="blk" id="blk-red">
         <h2>¿Qué indicadores cumple la red?</h2>
         <p class="q">Resultado de los 8 establecimientos sumados frente a la meta del convenio (línea vertical). Verde: cumple. Amarillo: 80% de la meta o más. Rojo: menos del 80% de la meta.</p>
@@ -543,21 +547,6 @@ dash.calc('red_mensual', {
     if (ing) {
       R.status(k3s, 'info', 'Enero a ' + R.mesLargo(corte));
       k3c.textContent = R.p1(ing.pct) + ' con Plan de Tratamiento Integral (' + R.int(ing.num) + ' personas).';
-    }
-
-    // Versión pública (equipos clínicos): sin tramos ni descuentos; foco en metas de los indicadores
-    if (window.RX_PUBLICO && red.length) {
-      const enMeta = red.filter((r) => r.estado === 'Cumple meta').length, tot = red.length;
-      document.getElementById('mensaje').hidden = true;
-      const m = document.getElementById('mensaje-pub'); m.hidden = false; m.textContent = '';
-      const B = (t) => { const b = document.createElement('b'); b.textContent = t; return b; };
-      m.append('Con datos de ', B('enero a ' + R.mesLargo(corte)), ', la red cumple la meta en ', B(enMeta + ' de ' + tot), ' indicadores.');
-      if (peor) m.append(' El más rezagado es ', B(peor.indicador), ', con ', B(R.p1(peor.pct)), ' frente a una meta de ', B(peor.meta + '%'), '.');
-      document.getElementById('k1l').textContent = 'Indicadores de la red en meta';
-      document.getElementById('k1v').textContent = String(enMeta); document.getElementById('k1t').textContent = String(tot);
-      const kind = enMeta === tot ? 'ok' : enMeta * 2 >= tot ? 'warn' : 'bad';
-      k1.style.borderLeftColor = R.COL[kind];
-      R.status(k1s, kind, enMeta === tot ? 'Todos en meta' : (tot - enMeta) + ' bajo la meta o cerca de ella');
     }
 
     // Semáforo por establecimiento
