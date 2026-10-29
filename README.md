@@ -4,7 +4,7 @@ Vista web del dashboard de monitoreo del Programa de Rehabilitación Integral (c
 
 - **Ver el dashboard:** https://caelmillar-del.github.io/rhb-aps-aysen/
 - **Contenido:** datos agregados por establecimiento y mes (ingresos, ingresos con PTI, altas, intervención grupal, participación en comunidad). No contiene datos de personas.
-- **Actualización:** mensual, con cada nueva carga de la planilla de monitoreo. El enlace se mantiene.
+- **Actualización:** mensual, desde la versión de trabajo del referente. Esta página es la versión pública simplificada (situación y brechas). El enlace se mantiene.
 - **Archivo:** `index.html` es autónomo (incluye datos, estilos y la librería d3 v7.9.0); funciona sin conexión.
 
 ## Monitoreo AIDIA · Apoyos y Rehabilitación para NNA
