@@ -13,5 +13,5 @@ Tablero del programa AIDIA (Res. Exenta N° 959/2025, MINSAL) en AIDIA Coyhaique
 
 - **Ver el tablero:** https://caelmillar-del.github.io/rhb-aps-aysen/aidia/
 - **Contenido:** datos agregados por dispositivo y mes (ingresos, ingresos con PTI, altas, actividad grupal, participación en comunidad) y acumulados de TEA y capacitación. No contiene datos de personas.
-- **Actualización:** mensual. La pestaña "Actualizar datos" lee la planilla del mes en el navegador; los datos publicados están en el bloque `id="datos"` de `aidia/index.html`. El enlace se mantiene.
-- **Archivo:** `aidia/index.html` carga d3 y SheetJS desde cdnjs, por lo que necesita conexión a internet.
+- **Actualización:** mensual, desde la versión de trabajo del referente. Esta página es la versión pública simplificada (situación y brechas). El enlace se mantiene.
+- **Archivo:** `aidia/index.html` carga d3 desde cdnjs, por lo que necesita conexión a internet.
