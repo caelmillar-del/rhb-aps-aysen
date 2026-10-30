@@ -147,7 +147,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   'use strict';
   const PUBLICADOS = JSON.parse(document.getElementById('datos').textContent);
   let DATOS = PUBLICADOS, CALC = null;
-  const st = { corte: null, metodo: 'planilla', tab: 'situacion' };
+  const st = { corte: null, metodo: 'meta', tab: 'situacion' };
   const TABS = ['situacion', 'brechas'];
   /* ---------- Formato ---------- */
   const L = d3.formatLocale({ decimal: ',', thousands: '.', grouping: [3], currency: ['$', ''] });
